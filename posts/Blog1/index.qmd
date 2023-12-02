@@ -1,0 +1,99 @@
+---
+title: "Blog-1: Gaining Insights into Diabetes with Data Science"
+author: "Amal Sujith"
+date: "2023-11-29"
+categories: [code, analysis]
+image: "image1.jpg"
+---
+**Gaining Insights into Diabetes with Data Science**
+
+**Introduction**
+```{python}
+#Diabetes impacts millions globally. In this blog, we'll use Python to analyze a diabetes dataset, visualize key features, and build a predictive model with logistic regression. Join me on this journey into the data to uncover insights that could inform diabetes care and research.
+```
+
+**Exploring the Dataset**
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+df=pd.read_csv("diabetes.csv")
+df.head()
+df.info()
+df.describe(include='all')
+print('Duplication')
+df.duplicated().sum()
+df.isnull().sum()
+```
+```{python}
+#Exploratory Data Analysis
+```
+```{python}
+plt.xlabel("BMI")
+plt.ylabel('count')
+plt.figure(figsize=(6,6),facecolor='red',edgecolor='black',clear=False)
+a=sns.countplot(x=df['Outcome'],data=df)
+for ax in a.containers:
+    a.bar_label(ax)
+```
+```{python}
+#Pregnencies count
+```
+```{python}
+plt.xlabel("Pregnencies")
+plt.ylabel('count')
+plt.figure(figsize=(6,6),facecolor='yellow',edgecolor='black',clear=False)
+b=sns.countplot(x=df['Pregnancies'],data=df)
+for ax1 in b.containers:
+    b.bar_label(ax1)
+```
+```{python}
+#from the observation we can tell that many women have only 1 pregnency   
+```
+ ```{python}
+ plt.xlabel("Outcome")
+plt.ylabel('Pregnency')
+plt.figure(figsize=(6,6),facecolor='orange',edgecolor='black',clear=False)
+c=sns.barplot(x=df['Outcome'],y=df['Pregnancies'],data=df)
+for ax in c.containers:
+    c.bar_label(ax)
+```
+```{python}
+df=pd.read_csv("diabetes.csv")
+df
+plt.figure(figsize=(10,10),facecolor='orange',edgecolor='Black',clear=True)
+a=sns.heatmap(df.corr(),annot=True,fmt='.1g',linewidths=0.5)
+a
+```
+```{python}
+X=df.drop('Outcome',axis=1)
+Y=df.Outcome
+X
+Y
+X_train,X_test,Y_train,Y_test=train_test_split(X,Y,test_size=0.2)
+X_train
+X_test
+Y_train
+Y_test
+```
+```{python}
+import warnings
+warnings.filterwarnings("ignore")
+lr=LogisticRegression()
+lr.fit(X_train,Y_train)
+lr.predict(X_test)
+lr.predict([[1,200,100,20,200,28,0.3,30]])
+
+lr.score(X_test,Y_test)
+lr.predict_proba(X_test)
+lr.coef_
+lr.intercept_
+```
+
+**Conclusion**
+```{python}
+#This exploration shows how data science techniques like visualization and modeling can unlock insights from diabetes data. There are many opportunities to further analyze this data and extract meaningful patterns to inform care and quality of life.
+```

@@ -1,0 +1,130 @@
+---
+title: "Blog-2: Analyzing Advertising Data with Linear Regression"
+author: "Amal Sujith"
+date: "2023-11-29"
+categories: [code, analysis]
+image: "image3.jpg"
+---
+
+![](thumbnail.jpg)
+
+**Analyzing Advertising Data with Linear Regression**
+
+
+
+**Introduction**
+```{python}
+#Advertising is key for sales, but quantifying its impact can be tricky. In this post, we'll use Python to explore an advertising dataset, visualize relationships, and build a model to predict sales based on ad spending.
+```
+
+**Exploring the Dataset**
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+df=pd.read_csv("Advertising.csv")
+df
+```
+
+```{python}
+
+df.info()
+```
+```{python}
+df.describe()
+```
+```{python}
+df.isnull().sum()
+```
+```{python}
+plt.figure(figsize=(8, 10))
+
+columns_to_plot = ['Smartphones', 'Radio', 'TV', 'Sales']
+
+for i, column in enumerate(columns_to_plot, 1):
+    plt.subplot(3, 2, i)
+    sns.histplot(data=df[column], kde=True)
+    plt.title(column)
+    plt.xlabel(column)
+
+plt.tight_layout()
+plt.show() 
+```
+```{python}
+sns.boxplot(data=df)
+plt.title('Box Plot')
+plt.show()
+```
+```{python}
+correlation_matrix = df.corr()
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
+plt.title('Correlation Heatmap')
+plt.show()
+```
+```{python}
+plt.scatter(df["Smartphones"],df["Sales"],alpha=0.5)
+plt.xlabel("Sales")
+plt.ylabel("TV")
+plt.title("Comparison of Sales with Smartphones")
+plt.show()
+```
+```{python}
+plt.scatter(df["Radio"],df["Sales"],alpha=0.5)
+plt.xlabel("Sales")
+plt.ylabel("Radio")
+plt.title("Comparison of Sales with Radio")
+plt.show()
+```
+```{python}
+plt.scatter(df["TV"],df["Sales"],alpha=0.5)
+plt.xlabel("Sales")
+plt.ylabel("TV")
+plt.title("Comparison of Sales with TV")
+plt.show()
+```
+
+**Linear Regression Model**
+```{python}
+#We build a linear regression model to predict sales based on the ad channels. After splitting the data into training and test sets, we fit and evaluate the model.It achieves decent performance in predicting sales numbers based on new ad input data. Checking the actuals vs predictions shows the relationship and where the model.
+```
+
+```{python}
+X = df[['Smartphones', 'TV', 'Radio']]
+y = df['Sales']
+X.head()
+y.head()
+```
+```{python}
+X_train , X_test , y_train , y_test = train_test_split(X , y , test_size=0.2 , random_state=100)
+model = LinearRegression()
+model.fit(X_train , y_train )
+y_pred = model.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+mae = mean_absolute_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+print("Mean Squared Error:", mse)
+print("Mean Absolute Error:", mae)
+print("R-squared:", r2)
+```
+```{python}
+plt.figure(figsize=(8, 6))
+plt.scatter(y_test, y_pred, alpha=0.5)
+plt.xlabel("Actual Values (y_test)")
+plt.ylabel("Predicted Values (y_pred)")
+plt.title("Actual vs. Predicted Values")
+regression_line_x = np.linspace(min(y_test), max(y_test), 100)
+regression_line_y = regression_line_x
+plt.plot(regression_line_x, regression_line_y, color='red', linestyle='--', label="Regression Line")
+plt.legend()
+plt.show()
+```
+**Conclusion**
+```{python}
+
+#While not perfect, the model uncovers clear links between advertising dollars and sales response. This enables data-driven decisions about marketing mix and budget allocation. There are many opportunities to improve the model with techniques like regularization and interactions. But it's a solid starting point to quantify advertising's impact.
+```
