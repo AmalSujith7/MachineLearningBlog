@@ -1,0 +1,101 @@
+---
+title: "Blog-4: Uncover Anomalies in England's Weather: A Data-driven Exploration"
+author: "Amal Sujith"
+date: "2023-11-29"
+categories: [code, analysis]
+image: "image5.jpg"
+---
+---**Uncover Anomalies in England's Weather: A Data-driven Exploration**
+
+**Introduction**
+```{python}
+ #In this blog post, we take a deep dive into England's weather records using Python and libraries like pandas, seaborn, and matplotlib. Our goal is to uncover anomalies in temperature, wind, pressure, and humidity through statistical analysis and machine learning.
+ ```
+
+**Exploring the Dataset**
+```{python}
+
+import pandas as pd
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+%matplotlib inline
+import seaborn as sns
+import plotly.express as px
+import datetime as dt
+from datetime import timedelta
+import matplotlib.dates as mdates
+plt.rcParams['figure.figsize'] = (12,6)
+plt.style.use('fivethirtyeight')
+```
+```{python}
+df=pd.read_csv("EnglandWeather.csv")
+df
+df.head().style.set_properties(**{'background-color':'lightgreen','color':'black','border-color':'#8b8c8c'})
+df.shape
+df.dtypes
+df.sort_values('Formatted Date', inplace= True)
+df
+
+```
+
+**Data Preprocessing:**
+
+```{python}
+#We clean and preprocess the data by converting the 'Formatted Date' column to a datetime object and extracting additional temporal features.
+
+
+df['Formatted Date'] = pd.to_datetime(df.sort_values('Formatted Date')['Formatted Date'],utc=True)
+df['Formatted Date'] = df['Formatted Date'].sort_values()
+df['Formatted Date']
+df.dtypes
+df.isnull().sum()
+df['Day'] = df['Formatted Date'].dt.day
+df['Month'] = df['Formatted Date'].dt.month
+df['Year'] = df['Formatted Date'].dt.year
+df.groupby('Year')
+Year = pd.to_datetime(df['Formatted Date']).dt.year
+Month = pd.to_datetime(df['Formatted Date']).dt.month
+```
+**Detecting Anomalies using Z-Scores:**
+
+```{python}
+#A simple way to detect potential anomalies is by calculating z-scores. Z-scores measure how many standard deviations each data point is from the mean. We compute z-scores and Euclidean distances for key weather variables like temperature, wind, pressure, and humidity. Points with high Euclidean distances are flagged as potential anomalies.
+
+variables = ['Temperature (C)', 'Wind Speed (km/h)', 'Pressure (millibars)', 'Humidity']
+z_scores = (df[variables] - df[variables].mean()) / df[variables].std()
+z_scores
+euclidean_distance = pd.DataFrame({'euclidean_distance': z_scores.apply(lambda x: x**2).sum(axis=1)**0.5})
+threshold = euclidean_distance.mean() + 3 * euclidean_distance.std()
+threshold
+```
+```{python}
+#Identify the anomalies as those data points with a score above the threshold.
+```
+```{python}
+anomalies = df[euclidean_distance > threshold]
+sns.set_style("darkgrid")
+sns.scatterplot(data=df, x='Temperature (C)', y='Pressure (millibars)')
+sns.scatterplot(data=anomalies, x='Temperature (C)', y='Pressure (millibars)', color='red')
+```
+**Isolation Forest**
+```{python}
+# We employ the Isolation Forest algorithm, which isolates anomalies by randomly splitting the data.After training a model, we can score each data point based on how anomalous the model predicts it to be.
+
+#Looking at the humidity vs temperature scatterplot colored by these anomaly scores clearly highlights the most unusual points. Isolation Forests excel at detecting anomalies that are hard to find with traditional statistical methods.
+```
+```{python}
+from sklearn.ensemble import IsolationForest
+features = ['Temperature (C)', 'Wind Speed (km/h)', 'Pressure (millibars)', 'Humidity']
+X = df[features]
+model = IsolationForest(contamination=0.05)
+model.fit(X)
+df['anomaly_score'] = model.decision_function(X)
+df['anomaly'] = model.predict(X)
+sns.scatterplot(data=df, x='Temperature (C)', y='Humidity', hue='anomaly', palette='colorblind')
+```
+**Conclusion**
+```{python}
+#By combining statistical analysis and machine learning, we've uncovered intriguing anomalies in England's weather data. Understanding these irregularities helps ensure data quality and prompts deeper meteorological insights. As the volume of weather data grows, having data-driven anomaly detection tools becomes increasingly important for researchers and forecasters.
+```
