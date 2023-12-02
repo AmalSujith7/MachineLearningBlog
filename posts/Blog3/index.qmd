@@ -1,0 +1,182 @@
+---
+title: "Blog-5: Detecting Credit Card Fraud: A Comprehensive Analysis Using SVM "
+author: "Amal Sujith"
+date: "2023-11-09"
+categories: [news, code, analysis]
+image: "image2.jpg"
+---
+**Title: Detecting Credit Card Fraud: A Comprehensive Analysis Using SVM**
+
+**Introduction**
+```{python}
+ #In this blog post, we delve into the world of credit card transactions, utilizing machine learning techniques, specifically Support Vector Machines (SVM), to detect fraudulent activities. Using the Python programming language and various libraries such as pandas, numpy, scikit-learn, and seaborn, we aim to build a robust fraud detection model and evaluate its performance on a real-world credit card dataset.
+ ```
+ **Exploring the Dataset**
+```{python}
+import pandas as pd 
+import numpy as np
+from sklearn import preprocessing
+from sklearn.metrics import confusion_matrix
+from sklearn import svm
+import itertools
+import matplotlib.pyplot as plt
+import matplotlib.mlab as mlab
+import seaborn
+%matplotlib inline
+```
+```{python}
+data=pd.read_csv("creditcard.csv")
+```
+**Visualizing Fraudulent Transactions:**
+```{python}
+#Here we understand the distribution of fraudulent transactions is crucial. We visualize fraud amounts over time to identify potential patterns.
+```
+
+```{python}
+data.head()
+df = pd.DataFrame(data) 
+df.describe()
+df_fraud = df[df['Class'] == 1] # Recovery of fraud data
+plt.figure(figsize=(15,10))
+plt.scatter(df_fraud['Time'], df_fraud['Amount']) # Display fraud amounts according to their time
+plt.title('Scratter plot amount fraud')
+plt.xlabel('Time')
+plt.ylabel('Amount')
+plt.xlim([0,175000])
+plt.ylim([0,2500])
+plt.show()
+```
+```{python}
+nb_big_fraud = df_fraud[df_fraud['Amount'] > 1000].shape[0] # Recovery of frauds over 1000
+print('There are only '+ str(nb_big_fraud) + ' frauds where the amount was bigger than 1000 over ' + str(df_fraud.shape[0]) + ' frauds')
+```
+```{python}
+number_fraud = len(data[data.Class == 1])
+number_no_fraud = len(data[data.Class == 0])
+print('There are only '+ str(number_fraud) + ' frauds in the original dataset, even though there are ' + str(number_no_fraud) +' no frauds in the dataset.')
+print("The accuracy of the classifier then would be : "+ str((284315-492)/284315)+ " which is the number of good classification over the number of tuple to classify")
+```
+
+**Exploring Correlation and Feature**
+
+```{python}
+#To visualize the correlation heatmap and identify the most influential features.
+
+df_corr = df.corr()
+plt.figure(figsize=(15,10))
+seaborn.heatmap(df_corr, cmap="YlGnBu") # Displaying the Heatmap
+seaborn.set(font_scale=2,style='white')
+
+plt.title('Heatmap correlation')
+plt.show()
+```
+```{python}
+rank = df_corr['Class'] 
+df_rank = pd.DataFrame(rank) 
+df_rank = np.abs(df_rank).sort_values(by='Class',ascending=False) 
+                                                                  
+df_rank.dropna(inplace=True) 
+```
+```{python}
+df_train_all = df.iloc[:150000, :]  # Select the first 150,000 rows
+df_train_1 = df_train_all[df_train_all['Class'] == 1]
+df_train_0 = df_train_all[df_train_all['Class'] == 0]
+
+print('In this dataset, we have ' + str(len(df_train_1)) + ' frauds, so we need to take a similar number of non-frauds')
+
+df_sample = df_train_0.sample(300)
+df_train = pd.concat([df_train_1, df_sample])  
+df_train = df_train.sample(frac=1)  
+```
+**Building and Testing the Model**
+```{python}
+#we split the data into training and testing sets. The training data is used to build our SVM model, while the testing data lets us evaluate how well it identifies frauds.We feed the training features and labels into the SVM to teach it the patterns of legitimate and fraudulent transactions. SVMs work by finding the optimal boundaries between classes based on the input data. Once trained, we can predict labels for the testing set and see how well the model generalizes. We'll use custom metrics focused on fraud detection to rigorously assess its performance. If it falls short, we can iterate and tweak the model until it reliably flags the tricky frauds.
+```
+```{python}
+X_train = df_train.drop(['Time', 'Class'],axis=1)
+y_train = df_train['Class'] 
+X_train = np.asarray(X_train)
+y_train = np.asarray(y_train)
+df_test_all = df[150000:]
+X_test_all = df_test_all.drop(['Time', 'Class'],axis=1)
+y_test_all = df_test_all['Class']
+X_test_all = np.asarray(X_test_all)
+y_test_all = np.asarray(y_test_all)
+df_test_all = df[150000:]
+X_test_all = df_test_all.drop(['Time', 'Class'],axis=1)
+y_test_all = df_test_all['Class']
+X_test_all = np.asarray(X_test_all)
+y_test_all = np.asarray(y_test_all)
+X_train_rank = df_train[df_rank.index[1:11]] 
+X_train_rank = np.asarray(X_train_rank)
+X_test_all_rank = df_test_all[df_rank.index[1:11]]
+X_test_all_rank = np.asarray(X_test_all_rank)
+y_test_all = np.asarray(y_test_all)
+class_names=np.array(['0','1'])
+```
+**Evaluating the Model:**
+```{python}
+
+#We evaluate the SVM classifier using confusion matrices and custom evaluation criteria.
+```
+```{python}
+def plot_confusion_matrix(cm, classes,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = 'd' 
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+```
+```{python}
+classifier = svm.SVC(kernel='linear')
+classifier.fit(X_train, y_train)
+prediction_SVM_all = classifier.predict(X_test_all)
+cm = confusion_matrix(y_test_all, prediction_SVM_all)
+plot_confusion_matrix(cm,class_names)
+```
+```{python}
+print('Our criterion give a result of ' 
+      + str( ( (cm[0][0]+cm[1][1]) / (sum(cm[0]) + sum(cm[1])) + 4 * cm[1][1]/(cm[1][0]+cm[1][1])) / 5))
+print('We have detected ' + str(cm[1][1]) + ' frauds / ' + str(cm[1][1]+cm[1][0]) + ' total frauds.')
+print('\nSo, the probability to detect a fraud is ' + str(cm[1][1]/(cm[1][1]+cm[1][0])))
+print("the accuracy is : "+str((cm[0][0]+cm[1][1]) / (sum(cm[0]) + sum(cm[1]))))
+```
+```{python}
+#Rebalancing Weights
+```
+```{python}
+classifier_b = svm.SVC(kernel='linear',class_weight={0:0.60, 1:0.40})
+classifier_b.fit(X_train, y_train)
+```
+```{python}
+prediction_SVM_b_all = classifier_b.predict(X_test_all)
+cm = confusion_matrix(y_test_all, prediction_SVM_b_all)
+plot_confusion_matrix(cm,class_names)
+```
+```{python}
+print('Our criterion give a result of ' 
+      + str( ( (cm[0][0]+cm[1][1]) / (sum(cm[0]) + sum(cm[1])) + 4 * cm[1][1]/(cm[1][0]+cm[1][1])) / 5))
+print('We have detected ' + str(cm[1][1]) + ' frauds / ' + str(cm[1][1]+cm[1][0]) + ' total frauds.')
+print('\nSo, the probability to detect a fraud is ' + str(cm[1][1]/(cm[1][1]+cm[1][0])))
+print("the accuracy is : "+str((cm[0][0]+cm[1][1]) / (sum(cm[0]) + sum(cm[1]))))
+```
+
+**Conclusion**
+```{python}
+# In this post, we tackled credit card fraud detection using Support Vector Machines. We saw how imbalanced datasets, with far more normal transactions than frauds, can trip up standard models. By rebalancing class weights, we optimized our SVM to focus more on catching the frauds.SVMs provide a mighty tool for fraud fighting, but we can't just plug and play. Carefully evaluating metrics and tweaking for the data's nuances were key to making our model reliable in the real world.As we continue to advance in machine learning and data science, the fight against fraud remains an ever-evolving challenge with innovative solutions and techniques.
+```
