@@ -1,5 +1,5 @@
 ---
-title: "Blog-5: Detecting Credit Card Fraud: A Comprehensive Analysis Using SVM "
+title: "Blog-5: Classification : Detecting Credit Card Fraud: A Comprehensive Analysis Using SVM "
 author: "Amal Sujith"
 date: "2023-11-09"
 categories: [news, code, analysis]
