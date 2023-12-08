@@ -1,5 +1,5 @@
 ---
-title: "Blog-3: Exploring Weather Patterns through Machine Learning"
+title: "Blog-4: Anomaly/outlier detection"
 author: "Amal Sujith"
 date: "2023-11-29"
 categories: [code, analysis]
