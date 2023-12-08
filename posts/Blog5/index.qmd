@@ -1,5 +1,5 @@
 ---
-title: "Blog-4: Uncover Anomalies in England's Weather: A Data-driven Exploration"
+title: "Blog-4: Anomaly Detection in England's Weather: A Data-driven Exploration"
 author: "Amal Sujith"
 date: "2023-11-29"
 categories: [code, analysis]
