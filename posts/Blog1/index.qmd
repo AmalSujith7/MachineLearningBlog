@@ -8,6 +8,7 @@ image: "image1.jpg"
 **Gaining Insights into Diabetes with Data Science**
 
 **Introduction**
+** Topic: Probability theory and random variables"
 ```{python}
 #Diabetes impacts millions globally. In this blog, we'll use Python to analyze a diabetes dataset, visualize key features, and build a predictive model with logistic regression. Join me on this journey into the data to uncover insights that could inform diabetes care and research.
 ```
