@@ -1,5 +1,5 @@
 ---
-title: "Blog-2: Analyzing Advertising Data with Linear Regression"
+title: "Blog-2: Analyzing Advertising Data with Linear Regression and Non-Linear Regression"
 author: "Amal Sujith"
 date: "2023-11-29"
 categories: [code, analysis]
